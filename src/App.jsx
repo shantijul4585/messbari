@@ -1,4 +1,4 @@
-// Messbari Website – React + Tailwind + shadcn/ui
+// Messbari Website – React + Tailwind
 // ---------------------------------------------------
 import React, { useState } from "react";
 import {
@@ -7,9 +7,7 @@ import {
   Route,
   NavLink,
 } from "react-router-dom";
-import { Card, CardContent } from "./components/ui/card"; 
 import { Button } from "./components/ui/button";
-
 import classNames from "classnames";
 
 // -------------- CONSTANT DATA ------------------
@@ -61,35 +59,29 @@ function Home() {
   return (
     <div className="p-6 space-y-6">
       {/* Welcome */}
-      <Card>
-        <CardContent className="p-6">
-          <h2 className="text-lg font-semibold mb-2">Welcome, Messbari Family!</h2>
-          <p className="text-sm text-gray-600">
-            Everything you need—rooms, rent, meals &amp; expenses—at a glance.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="p-6 bg-white rounded shadow">
+        <h2 className="text-lg font-semibold mb-2">Welcome, Messbari Family!</h2>
+        <p className="text-sm text-gray-600">
+          Everything you need—rooms, rent, meals &amp; expenses—at a glance.
+        </p>
+      </div>
 
       {/* Summary + Rooms */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="p-6 flex flex-col items-center">
-            <span className="text-5xl font-extrabold">{TOTAL_MEMBERS}</span>
-            <span className="text-sm text-gray-600 mt-2">Total Members</span>
-          </CardContent>
-        </Card>
+        <div className="p-6 bg-white rounded shadow flex flex-col items-center">
+          <span className="text-5xl font-extrabold">{TOTAL_MEMBERS}</span>
+          <span className="text-sm text-gray-600 mt-2">Total Members</span>
+        </div>
 
         {MEMBERS.map(([room, names]) => (
-          <Card key={room}>
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-1">Room {room}</h3>
-              <ul className="text-sm list-disc ml-4">
-                {names.map((n) => (
-                  <li key={n}>{n}</li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+          <div key={room} className="p-4 bg-white rounded shadow">
+            <h3 className="font-semibold mb-1">Room {room}</h3>
+            <ul className="text-sm list-disc ml-4">
+              {names.map((n) => (
+                <li key={n}>{n}</li>
+              ))}
+            </ul>
+          </div>
         ))}
       </div>
     </div>
@@ -106,7 +98,9 @@ function Rent({ isAdmin }) {
   );
 
   const handleChange = (idx, key, value) =>
-    setRecords((r) => r.map((row, i) => (i === idx ? { ...row, [key]: value } : row)));
+    setRecords((r) =>
+      r.map((row, i) => (i === idx ? { ...row, [key]: value } : row))
+    );
 
   return (
     <div className="p-6 space-y-4">
@@ -140,7 +134,9 @@ function Rent({ isAdmin }) {
                     <input
                       type="number"
                       value={row.amount}
-                      onChange={(e) => handleChange(idx, "amount", e.target.value)}
+                      onChange={(e) =>
+                        handleChange(idx, "amount", e.target.value)
+                      }
                       className="w-24 border rounded px-1"
                     />
                   ) : (
@@ -151,7 +147,9 @@ function Rent({ isAdmin }) {
                   {isAdmin ? (
                     <select
                       value={row.paid ? "paid" : "unpaid"}
-                      onChange={(e) => handleChange(idx, "paid", e.target.value === "paid")}
+                      onChange={(e) =>
+                        handleChange(idx, "paid", e.target.value === "paid")
+                      }
                       className="border rounded px-1"
                     >
                       <option value="paid">Paid</option>
