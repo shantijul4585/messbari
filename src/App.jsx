@@ -7,8 +7,9 @@ import {
   Route,
   NavLink,
 } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "./components/ui/card"; 
+import { Button } from "./components/ui/button";
+
 import classNames from "classnames";
 
 // -------------- CONSTANT DATA ------------------
