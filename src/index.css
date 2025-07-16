@@ -1,3 +1,101 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* -------- Custom Fonts -------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+html, body {
+  @apply font-sans bg-gray-50 text-gray-800;
+  font-family: 'Inter', sans-serif;
+  scroll-behavior: smooth;
+}
+
+/* -------- Smooth Transitions -------- */
+* {
+  @apply transition-all duration-200;
+}
+
+/* -------- Reusable Component Classes -------- */
+.btn-primary {
+  @apply px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 shadow-md hover:shadow-lg;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-outline {
+  @apply px-4 py-2 rounded border border-gray-400 text-gray-700 hover:bg-gray-100 shadow-sm hover:shadow-md;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card {
+  @apply bg-white rounded-lg shadow-md p-6;
+  /* subtle hover effect */
+  transition: box-shadow 0.3s ease;
+}
+.card:hover {
+  @apply shadow-xl;
+}
+
+.heading-lg {
+  @apply text-2xl font-bold text-gray-800 mb-2;
+}
+
+.text-muted {
+  @apply text-sm text-gray-500;
+}
+
+/* -------- Responsive Table Styling -------- */
+table {
+  @apply w-full text-sm border border-gray-300 rounded-lg overflow-hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+th, td {
+  @apply p-2 border border-gray-200;
+}
+
+thead {
+  @apply bg-gray-100 font-medium;
+}
+
+/* -------- Navigation Highlight -------- */
+nav a.active {
+  @apply bg-blue-100 text-blue-700 rounded-lg;
+}
+
+/* -------- Fade-in Animation -------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* -------- Scrollbar Styling (optional) -------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #a0aec0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #718096;
+}
