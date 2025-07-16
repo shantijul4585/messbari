@@ -1,45 +1,120 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { db, auth } from "../../firebase";
+import {
+  doc,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
+import {
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+} from "firebase/auth";
 
 export default function OthersExpenditure() {
-  const [expenses, setExpenses] = useState(() => {
-    const saved = localStorage.getItem("others-expenses");
-    return saved ? JSON.parse(saved) : [{ purpose: "", amount: "" }];
+  const [expenses, setExpenses] = useState([{ purpose: "", amount: "" }]);
+  const [deposit, setDeposit] = useState("");
+  const [month, setMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
-  const [deposit, setDeposit] = useState(() => localStorage.getItem("others-deposit") || "");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [password, setPassword] = useState("");
 
-  const handleChange = (idx, key, value) => {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+
+  useEffect(() => {
+  const fetchData = async () => {
+    const docRef = doc(db, "othersExpenditure", month);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      setExpenses(data.expenses || []);
+      setDeposit(data.deposit || "");
+    } else {
+      setExpenses([{ purpose: "", amount: "" }]);
+      setDeposit("");
+    }
+  };
+
+  fetchData();
+}, [month]); // <- ADD month as a dependency
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      setIsAdmin(!!user);
+    });
+  }, []);
+
+  const handleChange = async (idx, key, value) => {
     const updated = [...expenses];
     updated[idx][key] = value;
     setExpenses(updated);
-    localStorage.setItem("others-expenses", JSON.stringify(updated));
+    await saveToFirestore(updated, deposit);
+  };
+
+  const addRow = async () => {
+    const updated = [...expenses, { purpose: "", amount: "" }];
+    setExpenses(updated);
+    await saveToFirestore(updated, deposit);
+  };
+
+  const updateDeposit = async (value) => {
+    setDeposit(value);
+    await saveToFirestore(expenses, value);
+  };
+
+  const saveToFirestore = async (updatedExpenses, updatedDeposit) => {
+    try {
+      await setDoc(doc(db, "othersExpenditure", month), {
+        expenses: updatedExpenses,
+        deposit: updatedDeposit,
+      });
+    } catch (error) {
+      alert("❌ Save failed: " + error.message);
+    }
+  };
+
+  const handleLogin = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+      setIsAdmin(true);
+      alert("✅ Logged in.");
+    } catch (error) {
+      alert("❌ Login failed: " + error.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    setIsAdmin(false);
+    alert("✅ Logged out.");
   };
 
   const total = expenses.reduce((sum, row) => sum + Number(row.amount || 0), 0);
   const balance = Number(deposit || 0) - total;
 
-  const addRow = () => {
-    const updated = [...expenses, { purpose: "", amount: "" }];
-    setExpenses(updated);
-    localStorage.setItem("others-expenses", JSON.stringify(updated));
-  };
-
-  const updateDeposit = (value) => {
-    setDeposit(value);
-    localStorage.setItem("others-deposit", value);
-  };
-
   return (
     <div className="p-6 space-y-4 max-w-3xl mx-auto">
+      <div className="flex items-center gap-3">
+        <label>Select Month:</label>
+        <input
+          type="month"
+          value={month}
+          onChange={(e) => setMonth(e.target.value)}
+          className="border p-2 rounded"
+        />
+      </div>
+
       <input
         type="number"
-        placeholder="Total Deposit with previous month calculation(negative/positive)"
+        placeholder="Total Deposit with previous month calculation"
         value={deposit}
         onChange={(e) => isAdmin && updateDeposit(e.target.value)}
         className="border p-2 rounded w-full"
         disabled={!isAdmin}
       />
+
       <table className="min-w-full border-collapse border border-gray-300">
         <thead>
           <tr>
@@ -74,33 +149,53 @@ export default function OthersExpenditure() {
           ))}
         </tbody>
       </table>
+
       {isAdmin && (
-        <button onClick={addRow} className="btn-outline mt-2 px-4 py-2 border rounded text-blue-600 hover:bg-blue-50">
+        <button
+          onClick={addRow}
+          className="btn-outline mt-2 px-4 py-2 border rounded text-blue-600 hover:bg-blue-50"
+        >
           Add Expense
         </button>
       )}
+
       <div className="text-right font-semibold space-y-1 mt-4">
         <p>Total Expenditure: ৳{total}</p>
         <p>Deposit: ৳{deposit}</p>
         <p>Balance: ৳{balance}</p>
       </div>
-      {!isAdmin && (
+
+      {!isAdmin ? (
         <div className="pt-4 text-sm text-gray-600 border-t">
-          <p>🔒 Admin access required to edit. Enter password:</p>
+          <p>🔒 Admin login required to edit:</p>
+          <input
+            type="email"
+            value={adminEmail}
+            onChange={(e) => setAdminEmail(e.target.value)}
+            placeholder="Admin Email"
+            className="border rounded p-1 mr-2"
+          />
           <input
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={adminPassword}
+            onChange={(e) => setAdminPassword(e.target.value)}
+            placeholder="Password"
             className="border rounded p-1 mr-2"
-            placeholder="Admin password"
           />
           <button
-            onClick={() => setIsAdmin(password === "admin123")}
+            onClick={handleLogin}
             className="btn-primary px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
           >
             Login
           </button>
         </div>
+      ) : (
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 text-white px-4 py-2 rounded mt-4"
+        >
+          Logout
+        </button>
       )}
     </div>
   );
